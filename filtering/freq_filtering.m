@@ -3,8 +3,13 @@
 % - Frequency domain is different from the spatial domain (based on
 % kernels) because it is not a local filtering process.
 % - Works directly with 
-
+% - TODO:
+%  - Implementar filtros de formatos padrão (gaussiano, ) e filtros
+%  de formatos estranhos (?)
+%
+%
 % Author : Saulo P.
+% Date Created: 
 %=========================================================================
 %% Transform template
 clear all;
@@ -47,3 +52,5 @@ butterworthbpf(im, 1, 50, 4);
 
 % HPF:
 butterworthbpf(im, 100, Inf, 4);
+
+%% Toeplitz filtering

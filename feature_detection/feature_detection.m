@@ -1,6 +1,6 @@
 %% Feature Detector:
-% Simple feature detector created for study purposes.
-% Based on Szeliski's book Algorithm 4.1
+% Basic auto-correlation-based keypoint detector (Szeliski's Algorithm 4.1)
+% Implementted for study purposes.
 %
 % Author:   Saulo Pereira
 % Date:     03/04/17
@@ -56,10 +56,20 @@ scatter(coord(:,1),coord(:,2))
 figure;
 surf(F)
 
+%% Comparisons:
+points = detectSURFFeatures(I);    
+[features, points] = extractFeatures(I, points);
+
+figure;
+imshow(I)
+hold on;
+scatter(points.Location(:,1), points.Location(:,2));
+
 %% Resultados interessantes: 
 % 1. Os pontos escolhidos são similares quando se alteram as direções dos
 %    gradientes.
 % 2. Vale testar qual o efeito da ordem do gradiente.
+% 3. SURF retorna resultados bem diferentes do extrator implementado acima.
 
 
 %% Compute auto-correlation (patch 5) over all the image to show surface
