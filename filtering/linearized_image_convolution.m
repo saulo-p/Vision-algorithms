@@ -18,6 +18,7 @@ close all;
 
 % input image load:
 im = rgb2gray(imread('lena.bmp'));
+im = im(200:349, 200:349);
 im_float = im2double(im);
 clear im;
 
@@ -36,22 +37,29 @@ h = [0 1 0;1 -4 1;0 1 0];
 % Toeplitz structure
 r = [h(:,1)' zeros(1, im_r - K) h(:,2)' zeros(1, im_r - K) h(:,3)' zeros(1, im_r - K) ...
      zeros(1, (im_c - 3)*im_r)];
-% c = [h(1,1); zeros(im_r*im_c,1)];
-% Too big to generate by toeplitz.
-% TP = toeplitz(c,r);
  
 %% Output image generation
 % Since the required toeplitz matrix is too big to be generated (1GB/pixel)
 
-Hf = zeros(im_r, im_c);
-for i = 1:(im_r*im_c)
-%     i
-    Hf(i) = r*f;
+if (max([im_r im_c]) < 200)
+    'Toeplitz version'
+    c = [h(1,1); zeros(im_r*im_c,1)];
+    TP = toeplitz(c,r);
+    TP = TP(1:end-1,:);
     
-    r = circshift(r,1);
+    Hf = TP*f;
+else
+    'Iterative version'
+    Hf = zeros(im_r*im_c, 1);
+    for i = 1:(im_r*im_c)
+    %     i
+        Hf(i) = r*f;
+
+        r = circshift(r,1);
+    end
 end
 
-%% Output image
+%% Output image show
 
 im_out = reshape(Hf, im_r, im_c);
 imshow(im_float);
