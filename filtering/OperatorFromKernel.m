@@ -1,4 +1,4 @@
-function H = OperatorFromKernel(h, im_size, H_blocks)
+function H = OperatorFromKernel(h, im_size, im_size_pad, H_blocks)
 % Given a 2D convolution kernel "h" and the size of the target image, the
 % function returns the the operator (H) that works on the linearized version of
 % the image.
@@ -13,16 +13,16 @@ h_s = size(h);
 %Toeplitz precisa ser montado com o filtro completo, logo, precisamos
 %truncar a matriz final.
 
-h_pad = [h; zeros(im_size(1)-h_s(1),h_s(2))];
-r = reshape(h_pad, im_size(1)*h_s(2), 1)';
-r = [r zeros(1, (im_size(2)-h_s(2))*im_size(1))];
+h_pad = [h; zeros(im_size_pad(1)-h_s(1),h_s(2))];
+r = reshape(h_pad, im_size_pad(1)*h_s(2), 1)';
+r = [r zeros(1, (im_size_pad(2)-h_s(2))*im_size_pad(1))];
 
 if (max(im_size) < 200)
     'Toeplitz version'
     c = [h(1,1); zeros(im_size(1)*im_size(2) - 1, 1)];
     H = toeplitz(c, r);
 else
-    'Iterative version'
+    'Iterative version (TODO)'
 %     H = zeros(im_size(1)*im_size(2),im_size(1)*im_size(2)/H_blocks , H_blocks);
 %     for i = 1:(im_size(1)*im_size(2))
 %         H(i,:,j) = r;
