@@ -1,7 +1,10 @@
 function I_padded = ImagePadding(I, h_size)
 %Perform a zero padding to the image I according to the biggest kernel
 %applied to the image.
-% Talvez o padding precise ser assimetrico
+
+%talvez substituir chamada da função por troca do 'same' na conv2.
+% atual deteriora bordas da imagem com o filtro local
+
 
 h_center = floor(h_size/2);
 lr = [h_center(2) h_size(2) - h_center(2)];

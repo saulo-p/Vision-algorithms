@@ -10,16 +10,14 @@ function H = OperatorFromKernel(h, im_size, im_size_pad, H_blocks)
 
 h_s = size(h);
 
-%Toeplitz precisa ser montado com o filtro completo, logo, precisamos
-%truncar a matriz final.
+h_cols = [h; zeros(im_size_pad(1)-1,h_s(2))];
+c = reshape(h_cols, size(h_cols,1)*size(h_cols,2), 1);
 
-h_pad = [h; zeros(im_size_pad(1)-h_s(1),h_s(2))];
-r = reshape(h_pad, im_size_pad(1)*h_s(2), 1)';
-r = [r zeros(1, (im_size_pad(2)-h_s(2))*im_size_pad(1))];
+c = [c; zeros((length(c)/h_s(2))*(im_size(2)-h_s(2)), 1)];
 
 if (max(im_size) < 200)
     'Toeplitz version'
-    c = [h(1,1); zeros(im_size(1)*im_size(2) - 1, 1)];
+    r = [h(1,1) zeros(1, im_size(1)*im_size(2) - 1)];
     H = toeplitz(c, r);
 else
     'Iterative version (TODO)'

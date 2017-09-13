@@ -1,5 +1,5 @@
 %% ========================================================================
-% Toeplitz convolution tests
+% Filtering and Toeplitz tests over 1D signals
 %
 % OBS: Implicit padding causes issues regarding the theoretical aspects.
 %  - Using the 'valid' part of the convolution causes problems with the
@@ -11,7 +11,7 @@
 close all;
 clear all;
 
-%%
+%% Filtering
 N = 10;
 
 % Signal and kernel definition
@@ -24,7 +24,6 @@ N2 = length(y);
 yf = fft(y);
 
 % Type 2 (frequency-domain):
-
 h_pad = [h zeros(1, N2 - length(h))];
 x_pad = [x zeros(1, N2 - length(x))];
 % padding is necessary to make the size of DFT the same of the convolved
@@ -35,11 +34,24 @@ hf = fft(h_pad);
 yf2 = xf.*hf;
 norm(yf - yf2)
 
-% Type 3 (toeplitz time-domain filtering):
+% Type 3 (matrix time-domain filtering):
 Hf = diag(hf);
 yf3 = (Hf*xf.').';
 
 norm(yf - yf3)
+
+%% Toeplitz convolution
+
+N = 15;
+x = rand(N, 1);
+
+h = [-1 2 1];
+h_c = [h zeros(1, N - 1)]';
+r = [h_c(1) zeros(1, N - 1)];
+
+H = toeplitz(h_c, r);   % same as toeplitz(h)
+
+norm(H*x - conv(h,x))
 
 %% On DFTs:
 % Uma DFT divide o espectro em partes iguais e soma os valores com os seus
