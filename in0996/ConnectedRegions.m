@@ -1,7 +1,10 @@
 function [lbI, num_regions] = ConnectedRegions(bwI)
-%Receives a bw image and return image with descriminated connected regions.
-% For each region assigns a specific value for that region (1, 2, 3...)
-% 8-connectivity is considered
+%Receives a bw image and returns image with connected regions specified.
+% For each region assigns a specific value for the pixels that belong to 
+% that region. *Values that are equal to background (black)
+% are not considered.
+% 8-connectivity is used.
+% TODO: Acelerar o processo de busca.
 
 bw_sz = size(bwI);
 lbI = zeros(bw_sz);
@@ -54,6 +57,6 @@ while (search_idx ~= bw_sz)
 %     search_idx
 end
 
-num_regions = label;
+num_regions = label - 1;
 end
 
