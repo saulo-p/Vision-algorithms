@@ -17,47 +17,31 @@ while (search_idx ~= bw_sz)
         while(~isempty(search_lifo))
             %remove head
             head = search_lifo(1,:);
-            lbI(head(1),head(2)) = label;
             search_lifo(1,:) = [];
+
+            if ( lbI(head(1),head(2)) ~= 0)
+                continue
+            end
+            lbI(head(1),head(2)) = label;
             
-            % TEST:
+            % Debug por padrão de busca:
 %             imshow(lbI, []);
 %             drawnow
             
             %add new nodes from same region
-            head_n = head + [-1 1];
-            if (bwI(head_n(1), head_n(2)) == bwI(head(1), head(2)) && lbI(head_n(1), head_n(2)) == 0 )
-                if(~sum(ismember(search_lifo, head_n, 'rows')))
+            neighborhood_8 = [-1 1;0 1;1 1;1 0;1 -1;0 -1;-1 -1];
+            for i = 1:length(neighborhood_8)
+                head_n = head + neighborhood_8(i,:);
+                
+                if (bwI(head_n(1), head_n(2)) == bwI(head(1), head(2)))
+                %if the pixels are part of same region
+%                  if( isempty(search_lifo) || ...
+%                      ~sum(ismember(search_lifo, head_n, 'rows')))
                     search_lifo = [head_n; search_lifo];
+%                  end
                 end
             end
-            head_n = head + [0 1];
-            if (bwI(head_n(1), head_n(2)) == bwI(head(1), head(2)) && lbI(head_n(1), head_n(2)) == 0 )
-                if(~sum(ismember(search_lifo, head_n, 'rows')))
-                    search_lifo = [head_n; search_lifo];
-                end
-            end
-            head_n = head + [1 1];
-            if (bwI(head_n(1), head_n(2)) == bwI(head(1), head(2)) && lbI(head_n(1), head_n(2)) == 0)
-                if(~sum(ismember(search_lifo, head_n, 'rows')))
-                    search_lifo = [head_n; search_lifo];
-                end
-            end
-            head_n = head + [1 0];
-            if (bwI(head_n(1), head_n(2)) == bwI(head(1), head(2)) && lbI(head_n(1), head_n(2)) == 0)
-                if( isempty(search_lifo) || ...
-                    ~sum(ismember(search_lifo, head_n, 'rows')))
-                    search_lifo = [head_n; search_lifo];
-                end
-            end
-            head_n = head + [1 -1];
-            if (bwI(head_n(1), head_n(2)) == bwI(head(1), head(2)) && lbI(head_n(1), head_n(2)) == 0)
-                if( isempty(search_lifo) || ...
-                    ~sum(ismember(search_lifo, head_n, 'rows')))
-                    search_lifo = [head_n; search_lifo];
-                end
-            end
-%             length(search_lifo)
+
         end
         label = label + 1;
     end
