@@ -74,12 +74,15 @@ for i = 1:size(inv_templates, 1)
     end
 end
 
-loci1 = centers{1};
-loci2 = centers{2};
+num_porcas = CountClusters(centers{1}', 10)
+num_parafusos = CountClusters(centers{2}', 30)
+
 
 imshow(im_target);
 hold on;
 % there is an implicit double inversion 
+loci1 = centers{1};
+loci2 = centers{2};
 scatter(loci1(:,1), loci1(:,2));
 scatter(loci2(:,1), loci2(:,2));
 
