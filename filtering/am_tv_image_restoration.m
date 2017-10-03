@@ -25,22 +25,23 @@ close all;
 %% Initial setup 
 
 %Input data (image and blur kernel):
-im = im2double(rgb2gray(imread('lena.bmp')));
+% im = im2double(rgb2gray(imread('./data/lena.bmp')));
+% im = im(250:349, 250:349);
+% im_sz = size(im);
+% % im = ImagePadding(im, size(h));
+% im_sz_pad = size(im);
+
+im = im2double(imread('./data/hor_lines.bmp'));
+im = im(1:4, 1:4);
+im_sz = size(im);
+im_sz_pad = im_sz;
 
 % blur kernel
 h = fspecial('gaussian');
+% h = [1 2 3;4 5 6;7 8 9];
 % forward difference kernels 
 dx = [-1 1];
 dy = dx'; %talvez invertido.
-
-% image limitation (computational complexity) and padding (correctness)
-% im = im(250:349, 250:349);
-im = im(250:279, 250:279);
-im_sz = size(im);
-im = ImagePadding(im, size(h));
-    %talvez substituir chamada da função por troca do 'same' na conv2.
-    % atual deteriora bordas da imagem com o filtro local
-im_sz_pad = size(im);
 
 % Input parameters (algorithm):
 mu = 1;
@@ -53,17 +54,28 @@ alpha_0 = 0.7;
 % Create synthetic observation (blur + noise)
 G = conv2(im, h, 'same');
 G = imnoise(G, 'salt & pepper', 0.01);
-% imshow(g);
+% imshow(G);
 
 % Image linearizations
 f_truth = reshape(im, im_sz_pad(1)*im_sz_pad(2), 1);
 g = reshape(G, im_sz_pad(1)*im_sz_pad(2), 1);
 
 % Pre-computed matrices
-Dx = sparse(OperatorFromKernel(dx, im_sz, im_sz_pad, 0));
-Dy = sparse(OperatorFromKernel(dy, im_sz, im_sz_pad, 0));
 H = sparse(OperatorFromKernel(h, im_sz, im_sz_pad, 0));
-D = Dx + Dy;
+% Dx = sparse(OperatorFromKernel(dx, im_sz, im_sz_pad, 0));
+% Dy = sparse(OperatorFromKernel(dy, im_sz, im_sz_pad, 0));
+% D = Dx + Dy;
+
+
+subplot(3,1,1);
+imshow(im);
+subplot(3,1,2);
+o = H*f_truth;
+O = reshape(o, im_sz(1), im_sz(2));
+imshow(O);
+subplot(3,1,3);
+C = conv2(im,h,'same');
+imshow(C);
 
 %% Algorithm initializations:
 f = g;
