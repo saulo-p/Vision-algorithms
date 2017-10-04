@@ -2,8 +2,7 @@
 % [IN0996] Visão Computacional - Projeto 1
 %  Questão 2
 %
-% Useful references:
-%
+% References:
 % https://www.mathworks.com/help/images/examples/detecting-a-cell-using-image-segmentation.html
 %
 % Aluno: Saulo Pereira (scrps@cin.ufpe.br)

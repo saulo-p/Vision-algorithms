@@ -1,4 +1,4 @@
-function H = OperatorFromKernel(h, im_size, im_size_pad, H_blocks)
+function H = OperatorFromKernel(h, im_size, H_blocks)
 % Given a 2D convolution kernel "h" and the size of the target image, the
 % function returns the operator (H) that works on the linearized version of
 % the image.
@@ -9,14 +9,15 @@ function H = OperatorFromKernel(h, im_size, im_size_pad, H_blocks)
 %   *Work for images that are not symmetrical
 
 h_s = size(h);
-h_s_half = floor(h_s/2);
-h_s_ref = h_s_half + 1;
+h_s_ref = ceil(h_s/2);
 
-% submatrixes of toeplitz structure
+% submatrices of toeplitz structure
 Hs = zeros(im_size(1), im_size(2), h_s(2));
 for i = 1:h_s(2)
-    r = [h(h_s_ref(1):-1:1, i)' zeros(1,im_size(1)-h_s_ref(2))];
-    c = [h(h_s_ref(1):end, i); zeros(im_size(1)-h_s_ref(1), 1)];
+    rs = length(h_s_ref(1):-1:1);
+    cs = length(h_s_ref(1):h_s(1));
+    r = [h(h_s_ref(1):-1:1, i)' zeros(1,im_size(1)-rs)];
+    c = [h(h_s_ref(1):end, i); zeros(im_size(1)-cs, 1)];
     Hs(:,:,i) = toeplitz(c, r);
 end
 Hs(:,:,h_s(2)+1)= zeros(im_size(1));
@@ -26,7 +27,7 @@ c = [(h_s_ref(2):h_s(2))'; (h_s(2)+1)*ones(im_size(2)-h_s_ref(2), 1)];
 r = [h_s_ref(2):-1:1       (h_s(2)+1)*ones(1, im_size(2)-h_s_ref(2))];
 Idx = toeplitz(c, r);
 
-% OPTIMIZE
+% TODO: OPTIMIZE THIS VERSION
 H = zeros(im_size(1)*im_size(2), im_size(1)*im_size(2));
 for i = 1:im_size(2)
     for j = 1:1:im_size(2)

@@ -6,7 +6,6 @@
 % https://www.mathworks.com/help/images/ref/normxcorr2.html
 % https://www.mathworks.com/help/images/ref/bwconncomp.html
 %
-%
 % Aluno: Saulo Pereira (scrps@cin.ufpe.br)
 % =========================================================
 close all;
@@ -76,7 +75,6 @@ end
 
 num_porcas = CountClusters(centers{1}', 10)
 num_parafusos = CountClusters(centers{2}', 30)
-
 
 imshow(im_target);
 hold on;
