@@ -47,8 +47,8 @@ subplot(1,2,2);
 imhist(im_vol);
 
 vol_bw = im_vol > 0.025;
-seD = strel('diamond', 1);
-vol_bw = imerode(vol_bw, seD);
+st_elem = strel('diamond', 1);
+vol_bw = imerode(vol_bw, st_elem);
 im_mask = imfill(vol_bw, 'holes');
 im_mask = AddFrame(im_mask, [1 1]);
 figure;
