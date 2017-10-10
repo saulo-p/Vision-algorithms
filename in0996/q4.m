@@ -19,17 +19,19 @@ im = im2double(rgb2gray(imread('./data/predio.bmp')));
 h1 = fspecial('average', 5);
 imf = conv2(im, h1);
 
+%% Edge detection
 % Hough detector is based on voting. Non-maximum supression from Canny
 % makes it suitable to work with the voting scheme.
 imb = edge(imf, 'canny');
 
-% Erode to remove vertical features (optional: rough will remove already)
+% Erode to remove vertical features (optional)
 % st_elem = [1 1];
 % imb = imerode(imb, st_elem);
 
 %% Line detection
 
-[H, tta, rho] = hough(imb, 'Theta', 40:0.5:89);
+[H, tta, rho] = hough(imb, 'Theta', 40:2.5:89);
+% figure; imshow(H, []); axis normal;
 peaks = houghpeaks(H, 10);
 lines = houghlines(imb, tta, rho, peaks);
 
@@ -42,7 +44,7 @@ for k = 1:length(lines)
    plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','green');
 end
 
-%% Information processing (heuristics and contextual information)
+%% Information processing (heuristics/contextual information)
 
 % Floors are expected to have the same heigth, so we want rho values
 % that are evenly spaced (main filter).
@@ -57,15 +59,13 @@ for i = 1:length(lines)
     rhos(i) = lines(i).rho;
 end
 
-[s_tta, idx_tta] = sort(ttas);
+% [s_tta, idx_tta] = sort(ttas);
 [s_rho, idx_rho] = sort(rhos);
 d = s_rho(2:end) - s_rho(1:end-1);
 median_d = median(d);
 
-% Pairs that are close are expected to represent the same line
-d = d( abs(d - median_d) < 0.1*median_d );
+d = d( abs(d - median_d) < 0.25*median_d );
 
-% Filter lines that do not follow the above logic
 disp('Numero de andares =')
-disp(length(d) + 1)
+disp(length(d))
 

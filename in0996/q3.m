@@ -13,11 +13,9 @@ clear all;
 
 %% Input data:
 
-im = im2double(imread('./data/69020.jpg'));
+im = im2double(imread('./data/113044.jpg'));
 
-
-
-%% Teste da versão tutorial:
+%% Color space change:
 
 cform = makecform('srgb2lab');
 lab_im = applycform(im,cform);
@@ -28,25 +26,43 @@ nrows = size(ab,1);
 ncols = size(ab,2);
 ab = reshape(ab,nrows*ncols,2);
 
-nColors = 2;
+% RGB test:
+% rgb = double(im);
+% [nrows, ncols, ~] = size(rgb);
+% rgb = reshape(rgb,nrows*ncols,3);
+
+%% K-means segmentation
+nClusters = 2;
 % repeat the clustering 3 times to avoid local minima
-[cluster_idx, ~] = kmeans(ab,nColors,'distance','sqEuclidean', ...
-                          'Replicates',3);
+[cluster_idx, ~] = kmeans(ab,nClusters,'Distance','sqEuclidean', ...
+                          'Replicates', 5);
 
 pixel_labels = reshape(cluster_idx, nrows, ncols);
-imshow(pixel_labels,[]), title('image labeled by cluster index');
-imshow((~(pixel_labels-1)).*im);
+pixel_labels = pixel_labels - 1;
+
+imshow(pixel_labels,[]);
+title('labels returned');
+
+% figure;
+% imshow((~(pixel_labels-1)).*im);
 
 %% Post processing:
 
-% for i = 1:3
-%     [cluster_idx, ~] = kmeans(im(:,:,i), 2);
-%     
-% end
+% Select the biggest region.
+CC = bwconncomp(pixel_labels);
+numPixels = cellfun(@numel,CC.PixelIdxList);
+[biggest,idx] = max(numPixels);
+labels = zeros(size(pixel_labels));
+labels(CC.PixelIdxList{idx}) = 1;
+% labels = pixel_labels - labels;
+imshow(labels);
 
-
-% Espera-se formato de contorno simples para um animal. 
-% podemos usar essa informação para excluir contorno complexo.
-%  Extrai contorno
-%  Calcula direção do gradiente no contorno
-%  Descarta mudanças abruptas
+% Generate contour
+b = bwboundaries(labels);
+% dist(k) = length(b);
+imshow(im), hold on;
+for x = 1:numel(b)
+if length(b{x}) > 100
+  plot(b{x}(:,2), b{x}(:,1), 'r', 'Linewidth', 3)
+end
+end
