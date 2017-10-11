@@ -8,7 +8,7 @@ while(true)
     data = data(:,2:end);
     
     i = 1;
-    while (i <= length(cluster))
+    while (i <= size(cluster, 2))
         reference = cluster(:,i);
         
         dists = data - repmat(reference,1,size(data, 2));

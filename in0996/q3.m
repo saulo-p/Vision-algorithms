@@ -13,7 +13,7 @@ clear all;
 
 %% Input data:
 
-im = im2double(imread('./data/113044.jpg'));
+im = im2double(imread('./data/42049.jpg'));
 
 %% Color space change:
 
@@ -33,36 +33,40 @@ ab = reshape(ab,nrows*ncols,2);
 
 %% K-means segmentation
 nClusters = 2;
-% repeat the clustering 3 times to avoid local minima
+nReps = 5;
+% repeat the clustering nReps times to avoid local minima
 [cluster_idx, ~] = kmeans(ab,nClusters,'Distance','sqEuclidean', ...
-                          'Replicates', 5);
+                          'Replicates', nReps);
 
 pixel_labels = reshape(cluster_idx, nrows, ncols);
 pixel_labels = pixel_labels - 1;
 
+% Assumes that corner pixel is background.
+if (pixel_labels(end) == 1)
+    pixel_labels = ~pixel_labels;
+end
+
 imshow(pixel_labels,[]);
 title('labels returned');
-
-% figure;
-% imshow((~(pixel_labels-1)).*im);
 
 %% Post processing:
 
 % Select the biggest region.
-CC = bwconncomp(pixel_labels);
-numPixels = cellfun(@numel,CC.PixelIdxList);
-[biggest,idx] = max(numPixels);
+crs = bwconncomp(pixel_labels);
+numPixels = cellfun(@numel,crs.PixelIdxList);
+[~,idx] = max(numPixels);
+
 labels = zeros(size(pixel_labels));
-labels(CC.PixelIdxList{idx}) = 1;
-% labels = pixel_labels - labels;
-imshow(labels);
+labels(crs.PixelIdxList{idx}) = 1;
+% imshow(labels);
 
 % Generate contour
-b = bwboundaries(labels);
-% dist(k) = length(b);
+contour = bwboundaries(labels);
+
+% Plot contour over image
 imshow(im), hold on;
-for x = 1:numel(b)
-if length(b{x}) > 100
-  plot(b{x}(:,2), b{x}(:,1), 'r', 'Linewidth', 3)
-end
+for x = 1:numel(contour)
+    if length(contour{x}) > 100
+      plot(contour{x}(:,2), contour{x}(:,1), 'r', 'Linewidth', 3)
+    end
 end
