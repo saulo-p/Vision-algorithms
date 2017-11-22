@@ -1,18 +1,31 @@
-%% =============================================
+%% =======================================================================
+%
+% TODO: 
+% - Wrap corners extraction as function
+% - Use median corner distance as baseline for max_window size;
 %
 % Created: 9/11/2017
 % Author: Saulo P.
-% ==============================================
+% ========================================================================
 clear all;
 close all;
 
 %% Setup
 % Input data
-im = im2double(rgb2gray(imread('./anteparo_pat/img_3.png')));
+im = im2double(rgb2gray(imread('./anteparo_pat/IMG_20171108_125823143.jpg')));
 im_sz = size(im);
 
+%>Parameters:
+% LPF
 gaussian_size = 7;
 gaussian_sigma = 0.8;
+% Binarization
+bin_th = 0.4;
+% Morphological operations
+len = 7;
+
+% Max window
+window_size = 150; %pixels
 
 %% Main code
 
@@ -27,11 +40,10 @@ imf = imfilter(im, L);
 
 % Combines Sobel filters in each direction and performs threshold
 % binarization. TODO: binarize by bw percentage.
-imb = imfilter(imf, H) > 0.4  | imfilter(imf, H') > 0.4 | ...
-      imfilter(imf, -H) > 0.4 | imfilter(imf, -H') > 0.4;
+imb = imfilter(imf, H) > bin_th  | imfilter(imf, H') > bin_th | ...
+      imfilter(imf, -H) > bin_th | imfilter(imf, -H') > bin_th;
 
 %>Erosions
-len = 7;
 %Line erosions
 steL1 = strel('line',len,45);
 steL2 = strel('line',len,-45);
@@ -71,21 +83,12 @@ end
 %TEST: 
 for i = 1:2
     subplot(2,1,i); imshow(imbs{i}'); hold on; scatter(1:length(front{i}),front{i},'.');
-%     subplot(2,1,i); plot(front{i});
 end
-    
-%% OLD
-% [H, tta, rho] = hough(imb, 'Theta', -10:10);
-% % figure; imshow(H, []); axis normal;
-% peaks = houghpeaks(H, 15);
-% lines = houghlines(imb, tta, rho, peaks);
-% disp('hello');
-% 
-% figure;
-% imshow(imb);
-% hold on;
-% max_len = 0;
-% for k = 1:length(lines)
-%    xy = [lines(k).point1; lines(k).point2];
-%    plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','green');
-% end
+
+%>Find baselines 
+baselines{1} = movmax(front{1}, window_size);
+baselines{2} = movmin(front{2}, window_size);
+
+figure; imshow(im); hold on;
+plot(baselines{1}, 1:length(baselines{1}),'g', 'LineWidth',2);
+plot(baselines{2}, 1:length(baselines{2}),'g', 'LineWidth',2);
