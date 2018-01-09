@@ -31,70 +31,57 @@ window_size = 160; %pixels
 
 %% Main code
 
-%>Filters
-L = fspecial('gaussian', gaussian_size, gaussian_sigma);
-H = fspecial('sobel');
+%>Pre processing and binarization
+imb = PatternBinarization(im, gaussian_size, gaussian_sigma, bin_th);
 
-%>LPF:
-% imf = imfilter(im, L);
-imf = im;
+%> Find ROI (pattern and cylinder)
+[backg_idxs, gap_idxs] = FindCylinderROI(imb, gap_th);
 
-% %TEST: 4 direction filters
-% figure;
-% subplot(2,2,1); imshow(imfilter(imf,H)); subplot(2,2,2); imshow(imfilter(imf,H'));
-% subplot(2,2,3); imshow(imfilter(imf,-H)); subplot(2,2,4); imshow(imfilter(imf,-H'));
+%Remove undesired information.
+imb(1:backg_idxs,:) = 0;
+imb(backg_idxs(end):end,:) = 0;
+imb(:, gap_idxs) = 0;
 
-%>HPF: Combines Sobel filters in each direction and performs threshold
-% binarization. TODO: binarize by bw percentage.
-imb = imfilter(imf, H) > bin_th  | imfilter(imf, H') > bin_th | ...
-      imfilter(imf, -H) > bin_th | imfilter(imf, -H') > bin_th;
+% % TEST: ROI
+% figure; imshow(im + 0.5*imb); hold on;
+% plot([gap_idxs(1) gap_idxs(1)], [0 im_sz(1)], 'g');
+% plot([gap_idxs(end) gap_idxs(end)], [0 im_sz(1)], 'g');
+% plot([0 im_sz(2)], [backg_idxs(1) backg_idxs(1)] , 'g');
+% plot([0 im_sz(2)], [backg_idxs(end) backg_idxs(end)], 'g');
 
-%>Erosions
-%Line erosions
-% steL1 = strel('line',len,45);
-% steL2 = strel('line',len,-45);
-% imbe = imerode(imb,steL1) | imerode(imb,steL2);
-
-%% Vertical Gap: (conservative approximation)
-
-%>Find approximate vertical gap
-v_ws = sum(imb, 1);
-[~, gap_idx] = find(v_ws < gap_th);
-
-%TEST: Approximate gap plot
-figure; imshow(im + 0.5*imb); hold on;
-plot([gap_idx(1) gap_idx(1)], [0 im_sz(1)], 'g');
-plot([gap_idx(end) gap_idx(end)], [0 im_sz(1)], 'g');
 
 %% Find frontiers
 
 %>Separates image (left/right) based on approximate gap
-gap_sz = gap_idx(end) - gap_idx(1);
+gap_sz = gap_idxs(end) - gap_idxs(1);
 imbs{1} = imb;
-imbs{1}(:,gap_idx(end-floor(gap_sz/2)):end) = 0;
+imbs{1}(:,gap_idxs(end-floor(gap_sz/2)):end) = 0;
 imbs{2} = imb;
-imbs{2}(:, 1:gap_idx(1+floor(gap_sz/2))) = 0;
+imbs{2}(:, 1:gap_idxs(1+floor(gap_sz/2))) = 0;
 
 %>Determine frontier pixels of each image (left/right)
 for i = 1:2
     front{i} = zeros(1, size(imbs{i},1));
 end
 for j = 1:size(imbs{1},1)
+    aux = 0;
     maxim = max(find(imbs{1}(j,:)));
     if (maxim)
         front{1}(j) = maxim;
+        aux = maxim;
     else
-        front{1}(j) = front{1}(j-1);
+        front{1}(j) = aux;
     end
     %     front{1}(j) = max(find(imbs{1}(j,:)));
-
 end
 for j = 1:size(imbs{2},1)
+    aux = 1280;
     minim = min(find(imbs{2}(j,:)));
     if (minim)
         front{2}(j) = minim;
+        aux = minim;
     else
-        front{2}(j) = front{2}(j-1);
+        front{2}(j) = aux;
     end
 %     front{2}(j) = min(find(imbs{2}(j,:)));
 end
