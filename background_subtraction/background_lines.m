@@ -27,7 +27,7 @@ len = 7;
 % Gap
 gap_th = 10;
 % Max window
-window_size = 160; %pixels
+window_size = 100; %pixels
 
 %% Main code
 
@@ -59,87 +59,20 @@ imbs{1}(:,gap_idxs(end-floor(gap_sz/2)):end) = 0;
 imbs{2} = imb;
 imbs{2}(:, 1:gap_idxs(1+floor(gap_sz/2))) = 0;
 
-%>Determine frontier pixels of each image (left/right)
-for i = 1:2
-    front{i} = zeros(1, size(imbs{i},1));
-end
-for j = 1:size(imbs{1},1)
-    aux = 0;
-    maxim = max(find(imbs{1}(j,:)));
-    if (maxim)
-        front{1}(j) = maxim;
-        aux = maxim;
-    else
-        front{1}(j) = aux;
-    end
-    %     front{1}(j) = max(find(imbs{1}(j,:)));
-end
-for j = 1:size(imbs{2},1)
-    aux = 1280;
-    minim = min(find(imbs{2}(j,:)));
-    if (minim)
-        front{2}(j) = minim;
-        aux = minim;
-    else
-        front{2}(j) = aux;
-    end
-%     front{2}(j) = min(find(imbs{2}(j,:)));
-end
-
-%>Find baselines (based on min/max window)
-baselines{1} = movmax(front{1}, window_size);
-baselines{2} = movmin(front{2}, window_size);
-
-%>Smooth baselines
-for i = 1:2
-    baselines{i} = conv(baselines{i}, ones(1, window_size/2)/(window_size/2), 'same');
-end
+%>Find cylinder contours
+[front, contours] = FindContours(imbs, backg_idxs, window_size);
 
 %TEST: Estimated object contour
 figure; imshow(im); hold on;
 for i = 1:2
-    scatter(front{i}, 1:length(front{i}),'b.');
+    scatter(front{i}, backg_idxs,'b.');
 end
-plot(baselines{1}, 1:length(baselines{1}),'g', 'LineWidth',2);
-plot(baselines{2}, 1:length(baselines{2}),'g', 'LineWidth',2);
+plot(contours{1}, backg_idxs, 'g', 'LineWidth',2);
+plot(contours{2}, backg_idxs, 'g', 'LineWidth',2);
+
+save ('contours.mat', 'contours', 'backg_idxs', 'im_sz');
 
 
-%% Reconstruction
-
-%> Pairs of points
- %TODO: encontrar valores utilizando a mesma janela vertical do padrao.
-v1 = 490;
-v2 = 750;
-d1 = [baselines{1}(v1) baselines{2}(v1)];
-d2 = [baselines{1}(v2) baselines{2}(v2)];
-
-load camera
-
-%> Reconstruction (poor version)
-Z1 = 20e-2*K(1)/(d1(2) - d1(1));
-Z2 = 20e-2*K(1)/(d2(2) - d2(1));
-Y1 = Z1*(v1 - 512)/K(2,2);
-Y2 = Z2*(v2 - 512)/K(2,2);
-%> Scene
-
-figure;
-scatter3(0,0,0);
-hold on;
-scatter3(0, Y1, Z1, '.r');
-scatter3(0, Y2, Z2, '.r');
-
-N = 200
-thetas = linspace(0, 360, N)
-Xs = 20e-2*cosd(thetas);
-Zs = 20e-2*sind(thetas);
-scatter3(Xs, Y1*ones(1,N), Z1 + Zs, '.b');
-scatter3(Xs, Y2*ones(1,N), Z2 + Zs, '.b');
-set(gca, 'dataaspectratio', [1 1 1]);
-
-% point = [0 (Y1 - Y2)/2 (Z1 - Z2)/2];
-% vector = point - [0 Y1 Z1];
-% scatter3(point(1), point(2), point(3), '.g');
-% plot3([0 0], [(Y1 - Y2)/2  Y1], [(Z1 - Z2)/2  Z1], 'g');
 %% Find baselines equations
 
 % %>Create baselines image
