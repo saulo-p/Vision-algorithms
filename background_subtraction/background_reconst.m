@@ -15,7 +15,7 @@ load camera
 Npoints = length(backg_idxs);
 
 % Real world data
-D = 20e-2;
+Dmtr = 20e-2;
 
 %> 2D data
 ys = backg_idxs';
@@ -24,39 +24,43 @@ ds = [contours{1};
 xs = (ds(2,:) - ds(1,:))/2;
 
 %>Reconstruction of cylinder central axis (diameter approximation)
-Zs = D*K(1)./(ds(2,:) - ds(1,:));
-Cs = [Zs.*(xs - im_sz(1)/2)/K(2,2);
-      Zs.*(ys - im_sz(2)/2)/K(2,2);
-      Zs];
+Z = Dmtr*K(1)./(ds(2,:) - ds(1,:));
+Cs = [Z.*(xs - im_sz(1)/2)/K(2,2);
+      Z.*(ys - im_sz(2)/2)/K(2,2);
+      Z];
 
 centr = mean(Cs, 2);
 Csn = Cs - repmat(centr, 1, Npoints);
 
 %>Least Squares solution
-[U, S, V] = svd(Csn');
-normal = V(:,end);
+[~, ~, V] = svd(Csn');
+direct = V(:,1);
 
-sqrt(sum(((Csn'*normal).^2)/Npoints))
-
-% Zs = D*K(1)./(ds(2,:) - ds(1,:));
-% Ys = Zs.*(ys - 512)/K(2,2);
-% Xs = zeros(1, Npoints); %considers that cylinder is vertical on image
-
+RMS = sqrt(sum(((Csn'*direct).^2)/Npoints))
 
 %% Reconstructed scene synthesis
 figure;
-scatter3(0,0,0);
+scatter3(0,0,0, 'filled');
 hold on;
-scatter3(Xs, Ys, Zs, '.r');
+scatter3(Cs(1,:), Cs(2,:), Cs(3,:), '.r');
 
-N = 100;
-thetas = linspace(0, 360, N);
-Xcyl = 20e-2*cosd(thetas);
-Zcyl = 20e-2*sind(thetas);
-for i = 1:Npoints
-    scatter3(Xcyl, Ys(i)*ones(1,N), Zs(i) + Zcyl, '.b');
-end
+%>Fitted line
+line = [centr - 0.2*direct centr + 0.2*direct];
+plot3(line(1,:), line(2,:), line(3,:), 'g');
+
+[Xc, Yc, Zc] = cylinder2(Dmtr*[1 1], direct);
+Xc = Xc + centr(1);
+Yc = Yc + centr(2);
+Zc = Zc + centr(3);
+surf(Xc, Yc, Zc);
+[Xc, Yc, Zc] = cylinder2(Dmtr*[1 1], -direct);
+Xc = Xc + centr(1);
+Yc = Yc + centr(2);
+Zc = Zc + centr(3);
+surf(Xc, Yc, Zc);
+colormap([0  0  1]);
 set(gca, 'dataaspectratio', [1 1 1]);
+
 
 %> Versao atual esta incorreta, considera X fixo. O correto e reconstruir a
 %nuvem de pontos 
