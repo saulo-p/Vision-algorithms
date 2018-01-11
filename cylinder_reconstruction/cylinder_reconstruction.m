@@ -1,13 +1,20 @@
 %% =======================================================================
-% Reconstruction of cylinder from structured background
+% Monocular reconstruction of cylinder of known radius.
+%  INPUTS:
+%   *Camera intrinsics
+%   *Cylinder contours 
+%   *Cylinder radius
 %
-% Created: 9/11/2017
+%  OUTPUTS:
+%   *Cylinder axis parametric equation
+%
+% Created: 09/01/2018
 % Author: Saulo P.
 % ========================================================================
 clear all;
 close all;
 
-%% Reconstruction
+%% Input data
 
 load contours
 load camera
@@ -22,6 +29,8 @@ ys = backg_idxs';
 ds = [contours{1};
       contours{2}];
 xs = (ds(2,:) - ds(1,:))/2;
+
+%% Reconstruction
 
 %>Reconstruction of cylinder central axis (diameter approximation)
 Z = Dmtr*K(1)./(ds(2,:) - ds(1,:));
@@ -60,7 +69,3 @@ Zc = Zc + centr(3);
 surf(Xc, Yc, Zc);
 colormap([0  0  1]);
 set(gca, 'dataaspectratio', [1 1 1]);
-
-
-%> Versao atual esta incorreta, considera X fixo. O correto e reconstruir a
-%nuvem de pontos 
