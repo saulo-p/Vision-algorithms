@@ -8,13 +8,13 @@ K = cameraParams.IntrinsicMatrix';
 
 imgs = [29 30 33 35 36];
 
-    vds = [];
+vds = [];
 for i = 1:length(imgs)
     img = imread([path 'img_' num2str(imgs(i)) '.png']);
     img = im2double(img);
     im_sz = size(img);
     
-    [img,newOrigin] = undistortImage(img,cameraParams);
+    [img, ~] = undistortImage(img,cameraParams);
 %     figure;
 %     imshow(img);
     
