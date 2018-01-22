@@ -32,27 +32,27 @@ vd = V(:,1);
 p0 = centr;
 
 %% Reconstructed scene synthesis
-figure(2);
-scatter3(0,0,0, 'b', 'filled');
-hold on;
-scatter3(Cs(1,:), Cs(2,:), Cs(3,:), '.r');
-
-%>Fitted line
-line = [centr - 0.2*vd centr + 0.2*vd];
-plot3(line(1,:), line(2,:), line(3,:), 'g');
-
-[Xc, Yc, Zc] = cylinder2(Dmtr*[1 1], vd);
-Xc = Xc + centr(1);
-Yc = Yc + centr(2);
-Zc = Zc + centr(3);
-surf(Xc, Yc, Zc);
-[Xc, Yc, Zc] = cylinder2(Dmtr*[1 1], -vd);
-Xc = Xc + centr(1);
-Yc = Yc + centr(2);
-Zc = Zc + centr(3);
-surf(Xc, Yc, Zc);
-colormap([0  0  1]);
-set(gca, 'dataaspectratio', [1 1 1]);
+% figure(2);
+% scatter3(0,0,0, 'b', 'filled');
+% hold on;
+% scatter3(Cs(1,:), Cs(2,:), Cs(3,:), '.r');
+% 
+% %>Fitted line
+% line = [centr - 0.2*vd centr + 0.2*vd];
+% plot3(line(1,:), line(2,:), line(3,:), 'g');
+% 
+% [Xc, Yc, Zc] = cylinder2(Dmtr*[1 1], vd);
+% Xc = Xc + centr(1);
+% Yc = Yc + centr(2);
+% Zc = Zc + centr(3);
+% surf(Xc, Yc, Zc);
+% [Xc, Yc, Zc] = cylinder2(Dmtr*[1 1], -vd);
+% Xc = Xc + centr(1);
+% Yc = Yc + centr(2);
+% Zc = Zc + centr(3);
+% surf(Xc, Yc, Zc);
+% colormap([0  0  1]);
+% set(gca, 'dataaspectratio', [1 1 1]);
 
 end
 
