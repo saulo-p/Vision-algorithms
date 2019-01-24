@@ -1,2 +1,3 @@
-# Vision-algorithms
-Basic vision algorithms. Mostly prototypes for study purposes.
+## Vision-algorithms
+
+Miscellaneous vision prototypes.
